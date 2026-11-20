@@ -1,0 +1,29 @@
+# Enrolled users. In a real deployment this is the corporate directory
+# (Entra ID / Okta / LDAP) and Tobira only consumes group membership.
+users:
+  - username: aiko
+    display_name: Aiko Tanaka
+    groups: [employees, finance]
+    mfa: true
+
+  - username: ben
+    display_name: Ben Carter
+    groups: [employees]
+    mfa: false
+
+  - username: chen
+    display_name: Chen Wei
+    groups: [employees, ot-engineers]
+    mfa: true
+
+  - username: dinesh
+    display_name: Dinesh Rao
+    groups: [employees, contractors]
+    mfa: true
+
+  # Offboarded. Kept in the directory so that revocation is testable.
+  - username: mallory
+    display_name: Mallory Quinn
+    groups: [employees, finance]
+    mfa: true
+    status: revoked

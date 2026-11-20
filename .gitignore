@@ -1,0 +1,22 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Generated at runtime - never commit keys or audit data
+pki/
+*.key
+*.crt
+*.pem
+logs/
+*.ecs.json
+
+# `tobira attack` regenerates these; the committed copies are samples
+# reports/

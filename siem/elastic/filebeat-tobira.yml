@@ -1,0 +1,36 @@
+# Filebeat input for the Tobira audit stream.
+#
+# The events are already ECS 8.x, so they need no ingest pipeline: the fields
+# land in the right place and Kibana's Security app can use them directly.
+#
+#   cp filebeat-tobira.yml /etc/filebeat/inputs.d/
+#   systemctl restart filebeat
+
+filebeat.inputs:
+  - type: filestream
+    id: tobira-access
+    enabled: true
+    paths:
+      - /var/log/tobira/tobira-ecs.json
+    parsers:
+      - ndjson:
+          target: ""           # keep ECS fields at the document root
+          add_error_key: true
+          overwrite_keys: true
+    fields_under_root: true
+    fields:
+      service.name: tobira
+      service.type: zero-trust-broker
+
+processors:
+  - add_host_metadata: ~
+  - drop_fields:
+      fields: ["agent.ephemeral_id", "log.offset"]
+      ignore_missing: true
+
+output.elasticsearch:
+  hosts: ["https://elasticsearch:9200"]
+  index: "logs-tobira.access-default"
+
+setup.ilm.enabled: false
+setup.template.enabled: false

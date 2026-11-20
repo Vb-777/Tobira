@@ -1,0 +1,20 @@
+<!--
+  Tobira decoder for Wazuh.
+
+  Tobira writes one ECS JSON object per line, so Wazuh's built-in JSON decoder
+  does the parsing. This file only has to claim the stream so that the fields
+  land under a predictable parent and the rules below can match on them.
+
+  Install:
+    cp tobira_decoders.xml /var/ossec/etc/decoders/
+    chown root:wazuh /var/ossec/etc/decoders/tobira_decoders.xml
+    /var/ossec/bin/wazuh-control restart
+-->
+<decoder name="tobira">
+  <program_name>^tobira$</program_name>
+</decoder>
+
+<decoder name="tobira-json">
+  <parent>tobira</parent>
+  <plugin_decoder>JSON_Decoder</plugin_decoder>
+</decoder>

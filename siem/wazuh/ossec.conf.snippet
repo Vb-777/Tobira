@@ -1,0 +1,11 @@
+<!--
+  Add this block to /var/ossec/etc/ossec.conf on the host running the broker so
+  the Wazuh agent tails the Tobira audit stream.
+
+  Tobira writes ECS JSON, one object per line, so log_format is "json" and no
+  custom parsing is needed.
+-->
+<localfile>
+  <log_format>json</log_format>
+  <location>/var/log/tobira/tobira-ecs.json</location>
+</localfile>

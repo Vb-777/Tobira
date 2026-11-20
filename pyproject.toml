@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tobira"
+version = "1.0.0"
+description = "Tobira - a zero trust private access lab: broker/connector model with identity-based access, device posture and SIEM logging"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Vaibhav Barsaiyan" }]
+keywords = ["zero-trust", "ztna", "security", "siem", "device-posture"]
+dependencies = [
+    "cryptography>=42.0",
+    "PyJWT[crypto]>=2.8",
+    "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "pytest-asyncio>=0.23", "ruff>=0.5"]
+
+[project.scripts]
+tobira = "tobira.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+tobira = ["siem/rules/*.yml"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+ignore = [
+    # Catching broad exceptions is deliberate in the scenario runner and in
+    # best-effort teardown paths: a crashing control must not mask the result.
+    "RUF100",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["E402"]

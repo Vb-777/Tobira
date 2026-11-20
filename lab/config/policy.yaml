@@ -1,0 +1,79 @@
+version: 1
+
+# Tobira only supports default-deny. There is no "permit any" fallback and no
+# concept of being "on the network".
+default: deny
+
+posture_profiles:
+  # Baseline bar for low-sensitivity internal tools.
+  standard:
+    require:
+      disk_encryption: true
+      firewall_enabled: true
+      os_supported: true
+      os_patch_age_days: { max: 30 }
+    min_score: 60
+
+  # Bar for applications holding regulated or personal data.
+  high:
+    require:
+      disk_encryption: true
+      firewall_enabled: true
+      edr_running: true
+      screen_lock: true
+      os_supported: true
+      os_patch_age_days: { max: 14 }
+    min_score: 80
+
+  # Bar for operational technology. Patch window is deliberately tight.
+  critical:
+    require:
+      disk_encryption: true
+      firewall_enabled: true
+      edr_running: true
+      screen_lock: true
+      secure_boot: true
+      os_supported: true
+      os_patch_age_days: { max: 7 }
+    min_score: 95
+
+rules:
+  # Finance staff reach payroll, from a hardened device, with MFA, during
+  # Japan business hours only.
+  - name: finance-payroll
+    users: { groups: [finance] }
+    apps: [payroll]
+    posture: high
+    mfa_required: true
+    time_window: { days: [mon, tue, wed, thu, fri], from: "08:00", to: "20:00", tz: Asia/Tokyo }
+    action: allow
+
+  # Every employee reaches the wiki from a reasonably healthy device.
+  - name: everyone-wiki
+    users: { groups: [employees] }
+    apps: [wiki]
+    posture: standard
+    action: allow
+
+  # Only OT engineers reach the plant HMI, and only from a critical-grade
+  # device with MFA.
+  - name: ot-engineers-hmi
+    users: { groups: [ot-engineers] }
+    apps: [factory-hmi]
+    posture: critical
+    mfa_required: true
+    action: allow
+
+  # Engineers reach the build server.
+  - name: engineers-build
+    users: { groups: [employees] }
+    apps: [build-server]
+    posture: standard
+    action: allow
+
+  # Explicit deny beats any allow: contractors never touch OT, even if they
+  # are also added to an engineering group by mistake.
+  - name: contractors-no-ot
+    users: { groups: [contractors] }
+    apps: [factory-hmi, payroll]
+    action: deny

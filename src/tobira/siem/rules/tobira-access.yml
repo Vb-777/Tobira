@@ -1,0 +1,170 @@
+# Detection content for the Tobira access stream.
+#
+# Field paths are ECS. MITRE references use ATT&CK Enterprise technique IDs.
+rules:
+
+  - id: TOB-001
+    title: Access token replayed from a different device
+    description: >
+      A token was presented on a TLS connection whose client certificate does not
+      match the certificate thumbprint the token was bound to. The credential has
+      left the device it was issued to. One occurrence is an incident.
+    type: match
+    severity: critical
+    selection:
+      event.action: authentication_failed
+      event.reason: token_device_mismatch
+    mitre: [T1550.001, T1539]
+    response: >
+      Revoke the user's active tokens, isolate the source device, and check
+      whether the token was exfiltrated from disk, memory or a log.
+
+  - id: TOB-002
+    title: App Connector tried to publish applications it does not own
+    description: >
+      A connector registered applications that policy does not assign to it.
+      Either the connector host is compromised or someone is attempting to
+      hijack traffic for a private application.
+    type: match
+    severity: critical
+    selection:
+      event.action: connector_registration_denied
+    mitre: [T1557, T1199]
+    response: Quarantine the connector host and rotate its certificate.
+
+  - id: TOB-003
+    title: Private application enumeration
+    description: >
+      One user was denied several *different* applications inside a short window.
+      On a flat VPN this reconnaissance would be invisible; here every attempt is
+      an explicit deny with a named application.
+    type: threshold
+    severity: high
+    selection:
+      event.action: access_denied
+    group_by: [user.name]
+    distinct: tobira.app
+    threshold: 3
+    window_seconds: 120
+    mitre: [T1046, T1087]
+    response: Confirm with the user, then review the device for unexpected tooling.
+
+  - id: TOB-004
+    title: Repeated access denials for one user
+    description: Sustained denial volume from a single identity.
+    type: threshold
+    severity: medium
+    selection:
+      event.action: access_denied
+    group_by: [user.name]
+    threshold: 5
+    window_seconds: 120
+    mitre: [T1110]
+    response: Check for a misconfigured client before treating as malicious.
+
+  - id: TOB-005
+    title: Device posture attestation forged or replayed
+    description: >
+      A posture attestation failed signature, nonce or freshness validation. The
+      endpoint is trying to claim a security state it cannot prove.
+    type: match
+    severity: high
+    selection:
+      event.action: authentication_failed
+      event.reason:
+        - posture_bad_signature
+        - posture_nonce_mismatch
+        - posture_stale
+        - posture_device_mismatch
+        - posture_malformed
+    mitre: [T1036, T1211]
+    response: Treat the endpoint as untrusted and re-image before re-enrolment.
+
+  - id: TOB-006
+    title: Revoked or invalid credential presented
+    description: A token that was revoked, expired or not issued by this IdP was used.
+    type: match
+    severity: high
+    selection:
+      event.action: authentication_failed
+      event.reason:
+        - token_revoked
+        - token_bad_signature
+        - token_wrong_issuer
+        - token_wrong_audience
+        - token_not_device_bound
+        - token_invalid
+    mitre: [T1078, T1606]
+    response: Confirm the offboarding workflow ran, then investigate the source.
+
+  - id: TOB-007
+    title: Tunnel rejected at the TLS or role boundary
+    description: >
+      A peer reached the broker without a valid certificate, or presented a
+      certificate whose role does not permit what it attempted - for example a
+      device certificate used to register as an App Connector.
+    type: match
+    severity: high
+    selection:
+      event.action: tunnel_rejected
+    mitre: [T1190, T1199]
+    response: Correlate the source address with expected connector and device fleet.
+
+  - id: TOB-008
+    title: Live session revoked after device posture dropped
+    description: >
+      A device that was healthy at login stopped meeting policy while connected,
+      and open connections were torn down. Evidence that continuous evaluation
+      fired rather than trusting the original login.
+    type: match
+    severity: high
+    selection:
+      event.action: access_revoked
+    mitre: [T1562.004]
+    response: Find out why the control was disabled on the endpoint.
+
+  - id: TOB-009
+    title: Session terminated by the broker
+    description: The broker ended a session outright rather than denying one request.
+    type: match
+    severity: high
+    selection:
+      event.action: session_terminated
+    mitre: [T1562]
+    response: Review the termination reason and the preceding events for that device.
+
+  - id: TOB-010
+    title: Access denied outside the permitted time window
+    description: >
+      An otherwise authorised user requested a restricted application outside its
+      business-hours window.
+    type: match
+    severity: medium
+    selection:
+      event.action: access_denied
+      event.reason: outside_time_window
+    mitre: [T1078]
+    response: Expected for genuine out-of-hours work; confirm with the user.
+
+  - id: TOB-011
+    title: Access denied because device posture is below policy
+    description: An endpoint failed the posture bar required by the application.
+    type: match
+    severity: low
+    selection:
+      event.action: access_denied
+      event.reason: posture_failed
+    mitre: [T1562.001]
+    response: Route the user to self-service remediation for the failing control.
+
+  - id: TOB-012
+    title: Access granted to a critical application
+    description: >
+      Not an attack - an auditable record that someone reached a crown-jewel
+      application, kept at informational severity for review and reporting.
+    type: match
+    severity: informational
+    selection:
+      event.action: access_granted
+      tobira.app: factory-hmi
+    response: Retain for audit; no action unless it correlates with other alerts.

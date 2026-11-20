@@ -1,0 +1,33 @@
+# Private application segments.
+#
+# Each application is reachable through exactly one App Connector. Nothing here
+# is published to the internet: the host/port pair is resolved *inside* the
+# private network by the connector itself.
+apps:
+  - name: payroll
+    description: Finance payroll web application
+    host: 127.0.0.1
+    port: 19001
+    connector: connector-hq
+    sensitivity: high
+
+  - name: wiki
+    description: Internal engineering wiki
+    host: 127.0.0.1
+    port: 19002
+    connector: connector-hq
+    sensitivity: normal
+
+  - name: factory-hmi
+    description: Plant floor HMI gateway
+    host: 127.0.0.1
+    port: 19003
+    connector: connector-factory
+    sensitivity: critical
+
+  - name: build-server
+    description: CI build server
+    host: 127.0.0.1
+    port: 19004
+    connector: connector-hq
+    sensitivity: normal
