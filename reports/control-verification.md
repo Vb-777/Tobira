@@ -58,47 +58,47 @@ Generated 2026-11-20 15:58 UTC
 
 ## Why each control holds
 
-**app_connector_opens_no_port** — The connector dials out to the broker and keeps one outbound tunnel; there is nothing inbound for a scanner to find.
+**app_connector_opens_no_port** â€” The connector dials out to the broker and keeps one outbound tunnel; there is nothing inbound for a scanner to find.
 
-**anonymous_tls_is_refused** — The broker requires a client certificate chaining to the lab CA, so an unauthenticated scanner never reaches application logic.
+**anonymous_tls_is_refused** â€” The broker requires a client certificate chaining to the lab CA, so an unauthenticated scanner never reaches application logic.
 
-**foreign_ca_certificate_is_refused** — Trust is pinned to one private CA, so minting your own certificate achieves nothing.
+**foreign_ca_certificate_is_refused** â€” Trust is pinned to one private CA, so minting your own certificate achieves nothing.
 
-**device_cert_cannot_publish_apps** — Certificate role is carried in the subject OU; a device certificate cannot be used to publish applications.
+**device_cert_cannot_publish_apps** â€” Certificate role is carried in the subject OU; a device certificate cannot be used to publish applications.
 
-**rogue_connector_cannot_claim_app** — Policy, not the connector, decides which connector serves which application, so traffic cannot be hijacked by a new registration.
+**rogue_connector_cannot_claim_app** â€” Policy, not the connector, decides which connector serves which application, so traffic cannot be hijacked by a new registration.
 
-**forged_token_is_rejected** — The broker holds only the IdP public key, so tokens it did not sign are rejected before any policy is consulted.
+**forged_token_is_rejected** â€” The broker holds only the IdP public key, so tokens it did not sign are rejected before any policy is consulted.
 
-**expired_token_is_rejected** — Tokens are short-lived by design, so stolen credentials have a small window of usefulness.
+**expired_token_is_rejected** â€” Tokens are short-lived by design, so stolen credentials have a small window of usefulness.
 
-**token_replay_from_other_device** — The token carries the thumbprint of the device certificate it was issued to; the broker compares it with the live TLS peer.
+**token_replay_from_other_device** â€” The token carries the thumbprint of the device certificate it was issued to; the broker compares it with the live TLS peer.
 
-**revoked_credential_is_rejected** — Revocation takes effect at the enforcement point immediately, not when the token happens to expire.
+**revoked_credential_is_rejected** â€” Revocation takes effect at the enforcement point immediately, not when the token happens to expire.
 
-**stale_nonce_is_rejected** — Each connection gets a fresh broker-chosen nonce, so a recorded handshake cannot be replayed.
+**stale_nonce_is_rejected** â€” Each connection gets a fresh broker-chosen nonce, so a recorded handshake cannot be replayed.
 
-**open_before_auth_is_rejected** — The broker keeps per-tunnel state and accepts nothing but AUTH until authentication has succeeded.
+**open_before_auth_is_rejected** â€” The broker keeps per-tunnel state and accepts nothing but AUTH until authentication has succeeded.
 
-**unhealthy_device_is_denied** — Disk encryption was switched off, so the device no longer meets the 'critical' profile the plant HMI requires.
+**unhealthy_device_is_denied** â€” Disk encryption was switched off, so the device no longer meets the 'critical' profile the plant HMI requires.
 
-**forged_posture_is_rejected** — A posture report is only accepted if signed by the private key of the device certificate presenting it.
+**forged_posture_is_rejected** â€” A posture report is only accepted if signed by the private key of the device certificate presenting it.
 
-**posture_device_id_mismatch_is_rejected** — The attested device id must match the certificate on the wire.
+**posture_device_id_mismatch_is_rejected** â€” The attested device id must match the certificate on the wire.
 
-**lateral_movement_is_blocked** — Reaching one application grants no network position at all, so there is nothing to pivot from. Payroll is not even listed.
+**lateral_movement_is_blocked** â€” Reaching one application grants no network position at all, so there is nothing to pivot from. Payroll is not even listed.
 
-**app_enumeration_is_blocked_and_detected** — Real applications and invented names produce the same answer, so the attacker learns nothing; the burst trips detection TOB-003.
+**app_enumeration_is_blocked_and_detected** â€” Real applications and invented names produce the same answer, so the attacker learns nothing; the burst trips detection TOB-003.
 
-**explicit_deny_beats_allow** — Dinesh is in 'employees' and 'contractors'. The contractor deny rule wins, which is the safe direction for a policy conflict.
+**explicit_deny_beats_allow** â€” Dinesh is in 'employees' and 'contractors'. The contractor deny rule wins, which is the safe direction for a policy conflict.
 
-**out_of_hours_access_is_denied** — The same identity, device and token produce a different answer depending on when the request is made.
+**out_of_hours_access_is_denied** â€” The same identity, device and token produce a different answer depending on when the request is made.
 
-**missing_mfa_is_denied** — Password-only authentication is enough for the wiki and not enough for payroll; the bar is per application.
+**missing_mfa_is_denied** â€” Password-only authentication is enough for the wiki and not enough for payroll; the bar is per application.
 
-**posture_drop_revokes_live_session** — Access is re-evaluated on every re-attestation, so the open connection is torn down rather than surviving until token expiry.
+**posture_drop_revokes_live_session** â€” Access is re-evaluated on every re-attestation, so the open connection is torn down rather than surviving until token expiry.
 
-**stale_posture_blocks_new_connections** — A device that stops proving its state loses access; silence is not treated as health.
+**stale_posture_blocks_new_connections** â€” A device that stops proving its state loses access; silence is not treated as health.
 
 ## Detections
 
